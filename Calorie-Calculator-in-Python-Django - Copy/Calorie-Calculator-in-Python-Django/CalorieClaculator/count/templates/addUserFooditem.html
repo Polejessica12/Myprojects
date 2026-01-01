@@ -1,0 +1,39 @@
+<form method="POST" action="{% url 'addFooditem' %}">
+  {% csrf_token %}
+  <div class="form-group">
+    <label>Select Meal Type:</label>
+    <select name="meal" class="form-control" required>
+      <option value="breakfast">Breakfast</option>
+      <option value="lunch">Lunch</option>
+      <option value="snacks">Snacks</option>
+      <option value="dinner">Dinner</option>
+    </select>
+  </div>
+  
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Select</th>
+        <th>Food Item</th>
+        <th>Calories</th>
+        <th>Carbs</th>
+        <th>Fats</th>
+        <th>Protein</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for food in fooditems %}
+      <tr>
+        <td><input type="checkbox" name="fooditem_ids" value="{{ food.id }}"></td>
+        <td>{{ food.name }}</td>
+        <td>{{ food.calories }}</td>
+        <td>{{ food.carbohydrates }}</td>
+        <td>{{ food.fats }}</td>
+        <td>{{ food.protein }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  
+  <button type="submit" class="btn btn-success">Add Selected</button>
+</form>

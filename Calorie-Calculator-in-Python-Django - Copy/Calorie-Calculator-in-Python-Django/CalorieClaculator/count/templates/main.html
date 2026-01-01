@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calorie Calculator</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+</head>
+<body>
+  {% include 'navbar.html' %}
+  <br><br>
+  <div class="container">
+    {% block content %}
+
+    <!-- Customer Selection -->
+    <form method="GET" action="">
+      <div class="form-group">
+        <label for="customer_id"><strong>Select a Customer:</strong></label>
+        <select id="customer_id" name="customer_id" class="form-control" onchange="this.form.submit()">
+          <option value="">-- Choose Customer --</option>
+          {% for cust in customers %}
+            <option value="{{ cust.id }}" {% if selected_customer_id == cust.id %}selected{% endif %}>
+              {{ cust.name }} ({{ cust.email }})
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+    </form>
+
+    {% if selected_customer %}
+    <hr>
+    <h4>Meal-wise Food Consumption by {{ selected_customer.name }}</h4>
+
+    
+    {% for meal, items in user_data.items %}
+      <div class="flex-box-row mt-4">
+        <h5 id="heading">{{ meal|title }}</h5>
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Carbs</th>
+              <th>Fats</th>
+              <th>Protein</th>
+              <th>Calorie</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if items %}
+              {% for food in items %}
+              <tr>
+                <td>{{ food.name }}</td>
+                <td>{{ food.carbohydrates }}</td>
+                <td>{{ food.fats }}</td>
+                <td>{{ food.protein }}</td>
+                <td>{{ food.calories }}</td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr><td colspan="5">No {{ meal }} items logged.</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    {% endfor %}
+    {% endif %}
+
+    {% endblock %}
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+</body>
+</html>

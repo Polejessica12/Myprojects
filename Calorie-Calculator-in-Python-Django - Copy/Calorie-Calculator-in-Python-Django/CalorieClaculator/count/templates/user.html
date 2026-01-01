@@ -1,0 +1,190 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calorie Calculator</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?display=swap&family=Inter:wght@400;500;700;900&family=Noto+Sans:wght@400;500;700;900"
+    />
+  </head>
+  <body class="font-[Inter]">
+    <div class="min-h-screen bg-white">
+      <header class="flex items-center justify-between border-b px-10 py-3">
+        <div class="flex items-center gap-4">
+          <svg class="w-6 h-6 text-gray-800" fill="currentColor" viewBox="0 0 48 48"><path d="M44 11.2727C44 14.0109..." /></svg>
+          <h2 class="text-lg font-bold">Calorie Calculator</h2>
+        </div>
+        <div class="flex gap-4 items-center">
+          <a href="{% url 'logout' %}" class="bg-gray-100 text-sm font-bold px-4 py-2 rounded-full">Logout</a>
+          <div class="w-10 h-10 rounded-full bg-cover bg-center" style="background-image: url('https://...')"></div>
+        </div>
+      </header>
+
+      <main class="px-6 py-8 max-w-5xl mx-auto">
+        <h1 class="text-2xl font-bold mb-4 text-center">Calorie Tracker</h1>
+        <p class="text-center text-gray-700 text-sm mb-6">Welcome, {{ request.user.username }}! Here's your calorie dashboard for today.</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div class="border rounded-lg p-4 text-center">
+            <p class="text-2xl font-bold">{{ cnt }}</p>
+            <p class="text-gray-500">Total items consumed today</p>
+          </div>
+          <div class="border rounded-lg p-4 text-center">
+            <p class="text-2xl font-bold">2000 kcal</p>
+            <p class="text-gray-500">Calorie Limit</p>
+          </div>
+          <div class="border rounded-lg p-4 text-center">
+            <p class="text-2xl font-bold">{{ totalCalories }} kcal</p>
+            <p class="text-gray-500">Calories Consumed</p>
+          </div>
+          <div class="border rounded-lg p-4 text-center">
+            <p class="text-2xl font-bold">{{ CalorieLeft }} kcal</p>
+            <p class="text-gray-500">Calories Left</p>
+          </div>
+        </div>
+
+        {% if totalCalories > 2000 %}
+          <div class="bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded mb-6" role="alert">
+            <strong class="font-bold">Warning!</strong>
+            <span class="block sm:inline">You have exceeded your daily calorie limit.</span>
+          </div>
+        {% endif %}
+
+        <div class="mb-8">
+          <p class="font-medium mb-1">Calories Progress</p>
+          <div class="w-full bg-gray-200 rounded-full h-2 mb-1">
+            <div class="bg-black h-2 rounded-full {{ Progress }}"></div>
+          </div>
+          <p class="text-sm text-gray-600">{{ CalorieLeft }} kcal left</p>
+        </div>
+
+        <h2 class="text-xl font-bold mt-10 mb-4">Today's Selected Food Items</h2>
+        <div class="mb-8 space-y-4">
+          {% for meal, items in meal_data.items %}
+            {% if items %}
+            <details class="bg-gray-50 rounded-lg border border-gray-200 p-4">
+              <summary class="cursor-pointer text-lg font-semibold capitalize mb-2 text-gray-800">
+                {{ meal }} ({{ items|length }} items)
+              </summary>
+              <ul class="mt-2 text-sm text-gray-700 list-disc list-inside space-y-1 pl-2">
+                {% for food in items %}
+                  <li>
+                    {{ food.name }} – {{ food.calories }} kcal 
+                    ({{ food.carbohydrates }}g carbs, {{ food.fats }}g fats, {{ food.protein }}g protein)
+                  </li>
+                {% endfor %}
+              </ul>
+            </details>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <h2 class="text-xl font-bold mb-4">Macronutrient Breakdown</h2>
+        {% for macro, label in macro_labels %}
+        <div class="mb-4">
+          <div class="flex justify-between">
+            <p class="font-medium">{{ label }}</p>
+            <p class="text-sm">
+              {% if macro == 'carbohydrates' %}{{ carbohydrates_value }}
+              {% elif macro == 'fats' %}{{ fats_value }}
+              {% elif macro == 'protein' %}{{ protein_value }}
+              {% endif %}g
+            </p>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2 mb-1">
+            {% if macro == 'carbohydrates' %}
+              <div class="bg-black h-2 rounded-full {{ carbohydrates_width }}"></div>
+            {% elif macro == 'fats' %}
+              <div class="bg-black h-2 rounded-full {{ fats_width }}"></div>
+            {% elif macro == 'protein' %}
+              <div class="bg-black h-2 rounded-full {{ protein_width }}"></div>
+            {% else %}
+              <div class="bg-black h-2 rounded-full"></div>
+            {% endif %}
+          </div>
+          <p class="text-sm text-gray-600">
+            {% if macro == 'carbohydrates' %}{{ carbohydrates_value }}g of 275g
+            {% elif macro == 'fats' %}{{ fats_value }}g of 70g
+            {% elif macro == 'protein' %}{{ protein_value }}g of 50g
+            {% endif %} consumed
+          </p>
+        </div>
+        {% endfor %}
+
+        <h2 class="text-xl font-bold mt-10 mb-4">Food Search</h2>
+        <form method="get" class="mb-6 flex gap-4 max-w-xl">
+          <input
+            type="text"
+            name="name"
+            value="{{ request.GET.name }}"
+            placeholder="Search for food..."
+            class="flex w-full border p-2 rounded"
+          />
+          <button type="submit" class="bg-blue-100 text-sm font-bold px-4 py-2 rounded-full">Search</button>
+        </form>
+
+        <h2 class="text-xl font-bold mt-10 mb-4">Add Food</h2>
+        <form method="POST" action="{% url 'addFooditem' %}" class="space-y-4">
+          {% csrf_token %}
+          <div>
+            <label class="block mb-1 font-medium">Select Meal</label>
+            <select name="meal" class="w-full border p-2 rounded">
+              <option value="">-- Choose a Meal --</option>
+              <option value="breakfast">Breakfast</option>
+              <option value="lunch">Lunch</option>
+              <option value="dinner">Dinner</option>
+              <option value="snacks">Snacks</option>
+            </select>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full border">
+              <thead>
+                <tr class="bg-gray-100">
+                  <th class="p-2 text-left">Select</th>
+                  <th class="p-2 text-left">Food</th>
+                  <th class="p-2 text-left">Calories</th>
+                  <th class="p-2 text-left">Carbs</th>
+                  <th class="p-2 text-left">Fats</th>
+                  <th class="p-2 text-left">Protein</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for food in myfilter.qs %}
+                <tr class="border-t">
+                  <td class="p-2"><input type="checkbox" name="fooditem_ids" value="{{ food.id }}" /></td>
+                  <td class="p-2">{{ food.name }}</td>
+                  <td class="p-2">{{ food.calories }}</td>
+                  <td class="p-2">{{ food.carbohydrates }}</td>
+                  <td class="p-2">{{ food.fats }}</td>
+                  <td class="p-2">{{ food.protein }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="text-right">
+            <button type="submit" onclick="return validateMealSelection()" class="bg-green-100 text-sm font-bold px-4 py-2 rounded-full">
+              Add Selected
+            </button>
+          </div>
+        </form>
+        <script>
+          function validateMealSelection() {
+            const mealSelect = document.querySelector('select[name="meal"]');
+            if (!mealSelect || mealSelect.value === "") {
+              alert("Please select a meal before submitting.");
+              return false;
+            }
+            return true;
+          }
+        </script>
+      </main>
+    </div>
+  </body>
+</html>

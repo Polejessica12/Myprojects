@@ -1,0 +1,44 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm p-4">
+                <h3 class="text-center mb-4">Add Food Item</h3>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="food_name">Enter Food Name</label>
+                        <input type="text" name="food_name" id="food_name" class="form-control" placeholder="e.g., Apple" required>
+                    </div>
+                    <div class="text-center">
+                        <input type="submit" class="btn btn-success mt-3" value="Submit">
+                    </div>
+                </form>
+
+                {% if messages %}
+                    <div class="mt-4">
+                        {% for message in messages %}
+                            <div class="alert 
+                                {% if message.tags == 'success' %}
+                                    alert-success
+                                {% elif message.tags == 'error' %}
+                                    alert-danger
+                                {% elif message.tags == 'info' %}
+                                    alert-info
+                                {% else %}
+                                    alert-secondary
+                                {% endif %}
+                                ">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
